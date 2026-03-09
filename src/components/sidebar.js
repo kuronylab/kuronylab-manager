@@ -13,7 +13,9 @@ export function renderSidebar() {
 
   container.innerHTML = `
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">K</div>
+      <div class="sidebar-logo-icon">
+        <img src="/logo.png" alt="KURONYLAB" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+      </div>
       <div class="sidebar-logo-text">
         <span class="sidebar-logo-name">KURONYLAB</span>
         <span class="sidebar-logo-label">Manager</span>

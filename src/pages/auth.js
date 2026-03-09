@@ -8,6 +8,9 @@ export function renderAuth() {
 
     container.innerHTML = `
         <div class="auth-card card">
+            <div class="auth-logo" style="text-align: center; margin-bottom: 2rem;">
+                <img src="/logo.png" alt="KURONYLAB" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--border-radius-lg); margin: 0 auto;">
+            </div>
             <div class="auth-header">
                 <h2 id="auth-title">ログイン</h2>
                 <p class="text-muted text-sm" id="auth-subtitle">KURONYLAB 収益管理システムへようこそ</p>

@@ -237,6 +237,11 @@ html {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  transition: background-color var(--transition-fast);
+}
+
+.sidebar-logo:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .sidebar-logo-icon {

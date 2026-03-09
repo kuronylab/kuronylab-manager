@@ -12,7 +12,7 @@ export function renderSidebar() {
   const user = store.state.user;
 
   container.innerHTML = `
-    <div class="sidebar-logo">
+    <a href="#dashboard" class="sidebar-logo" style="text-decoration: none; display: flex; align-items: center; gap: var(--spacing-md); cursor: pointer;">
       <div class="sidebar-logo-icon">
         <img src="/logo.png" alt="KURONYLAB" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
       </div>
@@ -20,7 +20,7 @@ export function renderSidebar() {
         <span class="sidebar-logo-name">KURONYLAB</span>
         <span class="sidebar-logo-label">Manager</span>
       </div>
-    </div>
+    </a>
     
     <nav class="sidebar-nav">
       <div class="sidebar-section">

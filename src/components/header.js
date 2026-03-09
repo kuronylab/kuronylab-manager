@@ -4,15 +4,28 @@ export function renderHeader() {
     const container = document.createElement('div');
     container.className = 'header-content';
 
+    const today = new Date();
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    const formattedDate = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日 (${days[today.getDay()]})`;
+
     container.innerHTML = `
-    <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
       <button class="mobile-menu-btn" id="mobile-menu-toggle">
         ☰
       </button>
       <h1 class="header-title" id="page-title">ダッシュボード</h1>
+      <span class="header-today-date" style="font-size: 0.9rem; color: var(--text-muted); padding-left: 1rem; border-left: 1px solid var(--border-color);">
+        本日: ${formattedDate}
+      </span>
     </div>
     
     <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-theme-toggle" title="テーマ切り替え" style="font-size: 1.2rem; padding: 4px 8px;">
+        <span id="theme-icon">🌞</span>
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-global-help" title="使い方・用語集">
+        <span style="font-size: 1.1rem;">❓ ヘルプ</span>
+      </button>
       <div class="header-month-selector">
         <button class="header-month-btn" id="prev-month">◀</button>
         <div class="header-month-label" id="current-month-label">
@@ -23,43 +36,80 @@ export function renderHeader() {
     </div>
   `;
 
-    // DOMがマウントされた後にイベントリスナーを設定する処理
-    setTimeout(() => {
-        const prevBtn = document.getElementById('prev-month');
-        const nextBtn = document.getElementById('next-month');
-        const menuBtn = document.getElementById('mobile-menu-toggle');
+    // DOM要素の取得（containerから直接検索）
+    const prevBtn = container.querySelector('#prev-month');
+    const nextBtn = container.querySelector('#next-month');
+    const menuBtn = container.querySelector('#mobile-menu-toggle');
 
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                let { currentYear, currentMonth } = store.state;
-                currentMonth--;
-                if (currentMonth < 1) {
-                    currentMonth = 12;
-                    currentYear--;
-                }
-                store.setMonth(currentYear, currentMonth);
-            });
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            let { currentYear, currentMonth } = store.state;
+            currentMonth--;
+            if (currentMonth < 1) {
+                currentMonth = 12;
+                currentYear--;
+            }
+            store.setMonth(currentYear, currentMonth);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            let { currentYear, currentMonth } = store.state;
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+            store.setMonth(currentYear, currentMonth);
+        });
+    }
+
+    if (menuBtn) {
+        menuBtn.addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('open');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (overlay) overlay.classList.toggle('open');
+        });
+    }
+
+    const helpBtn = container.querySelector('#btn-global-help');
+    if (helpBtn) {
+        helpBtn.addEventListener('click', () => {
+            import('./help.js').then(module => {
+                module.showHelpModal();
+            }).catch(err => console.error('Failed to load help module', err));
+        });
+    }
+
+    const themeToggleBtn = container.querySelector('#btn-theme-toggle');
+    const themeIcon = container.querySelector('#theme-icon');
+
+    if (themeToggleBtn && themeIcon) {
+        // 初期状態のチェックとアイコン設定
+        if (document.documentElement.getAttribute('data-theme') === 'light') {
+            themeIcon.textContent = '🌙';
+        } else {
+            themeIcon.textContent = '🌞';
         }
 
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                let { currentYear, currentMonth } = store.state;
-                currentMonth++;
-                if (currentMonth > 12) {
-                    currentMonth = 1;
-                    currentYear++;
-                }
-                store.setMonth(currentYear, currentMonth);
-            });
-        }
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                // ダークテーマへ変更
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.textContent = '🌞';
+            } else {
+                // ライトテーマへ変更
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                themeIcon.textContent = '🌙';
+            }
+        });
+    }
 
-        if (menuBtn) {
-            menuBtn.addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('open');
-            });
-        }
-
-    }, 0);
 
     // Storeの購読
     store.subscribe((state) => {

@@ -28,17 +28,27 @@ export function renderLedger() {
         <h3 class="card-title" id="ledger-title">総勘定元帳</h3>
         <button class="btn btn-secondary btn-sm" id="btn-export-ledger" style="display: none;">CSVエクスポート</button>
       </div>
+
+      <div class="help-panel" style="margin: 0 var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);">
+        <div class="help-panel-icon">💡</div>
+        <div class="help-panel-content">
+          <div class="help-panel-title">「総勘定元帳（そうかんじょうもとちょう）」とは？</div>
+          <div class="help-panel-text">科目（現金や売上など）ごとの専用ノートです。例えば「現金」を選ぶと、いつ現金が増えていつ減ったかの履歴と、今の「残高」がわかります。</div>
+        </div>
+      </div>
       
       <div class="table-wrapper">
         <table class="data-table">
           <thead>
             <tr>
-              <th width="15%">日付</th>
-              <th width="25%">相手科目</th>
-              <th width="20%">摘要</th>
-              <th width="13%" class="text-right">借方</th>
-              <th width="13%" class="text-right">貸方</th>
-              <th width="14%" class="text-right">差引残高</th>
+              <th width="10%">日付</th>
+              <th width="15%">相手科目</th>
+              <th width="15%">摘要</th>
+              <th width="10%">取引先</th>
+              <th width="15%">タグ</th>
+              <th width="12%" class="text-right">借方</th>
+              <th width="12%" class="text-right">貸方</th>
+              <th width="11%" class="text-right">差引残高</th>
             </tr>
           </thead>
           <tbody id="ledger-list">
@@ -124,6 +134,8 @@ export function onLedgerMount() {
           '日付': tx.date,
           '相手科目': oppAccountName,
           '摘要': tx.description || '',
+          '取引先': tx.partner || '',
+          'タグ': tx.tags || '',
           '借方': debitAmount,
           '貸方': creditAmount,
           '差引残高': balance
@@ -145,7 +157,7 @@ async function updateLedgerUI(accountCode) {
   const account = store.getAccountByCode(accountCode);
   title.textContent = `総勘定元帳 - ${account.name} (${currentYear}年)`;
 
-  listContainer.innerHTML = `<tr><td colspan="6" class="text-center text-muted">計算中...</td></tr>`;
+  listContainer.innerHTML = `<tr><td colspan="8" class="text-center text-muted">計算中...</td></tr>`;
 
   // 年間の全取引を取得
   const txs = await db.getTransactionsByYear(currentYear);
@@ -158,7 +170,7 @@ async function updateLedgerUI(accountCode) {
   if (targetTxs.length === 0) {
     if (exportBtn) exportBtn.style.display = 'none';
     listContainer.innerHTML = `
-      <tr><td colspan="6" class="text-center text-muted" style="padding: 3rem;">
+      <tr><td colspan="8" class="text-center text-muted" style="padding: 3rem;">
         ${currentYear}年の取引データはありません。
       </td></tr>
     `;
@@ -194,6 +206,8 @@ async function updateLedgerUI(accountCode) {
         <td class="date">${tx.date.replace(/-/g, '/')}</td>
         <td>${oppAccountName}</td>
         <td class="text-muted" style="font-size:0.85rem">${tx.description || ''}</td>
+        <td class="text-muted" style="font-size:0.85rem">${tx.partner || ''}</td>
+        <td class="text-muted" style="font-size:0.85rem">${tx.tags || ''}</td>
         <td class="amount text-emerald">${debitAmount ? formatCurrency(debitAmount) : ''}</td>
         <td class="amount text-rose">${creditAmount ? formatCurrency(creditAmount) : ''}</td>
         <td class="amount font-bold">${formatCurrency(balance)}</td>

@@ -13,6 +13,14 @@ export function renderTrialBalance() {
         <button class="btn btn-secondary btn-sm" id="btn-export-tb">CSVエクスポート</button>
       </div>
       
+      <div class="help-panel" style="margin: 0 var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);">
+        <div class="help-panel-icon">💡</div>
+        <div class="help-panel-content">
+          <div class="help-panel-title">「残高試算表（ざんだかしさんひょう）」とは？</div>
+          <div class="help-panel-text">すべての勘定科目の現在の「残高」を一覧できる集計表です。左側（借方）と右側（貸方）の合計額が必ず一致（バランス）することで、入力の計算ミスがないかを確認できます。</div>
+        </div>
+      </div>
+      
       <div class="table-wrapper">
         <table class="data-table">
           <thead>

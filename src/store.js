@@ -1,4 +1,5 @@
 import { db } from './db.js';
+import { supabase } from './utils/supabase.js';
 
 // グローバル状態管理（簡易React Context風）
 class Store {
@@ -19,7 +20,10 @@ class Store {
             isLoading: true,
 
             // ルーティング
-            currentRoute: 'dashboard'
+            currentRoute: 'dashboard',
+
+            // 認証
+            user: null
         };
 
         this.listeners = [];
@@ -40,8 +44,15 @@ class Store {
             this.state.accounts = accounts;
             this.state.settings = settings;
 
-            // 現在の月の取引を読み込み
+            // 最新の取引を読み込み
             await this.loadTransactions();
+
+            // 認証セッションがあればクラウド同期
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                this.state.user = session.user;
+                await this.syncFromCloud();
+            }
 
             this.state.isLoading = false;
             this.notify();
@@ -49,6 +60,19 @@ class Store {
             console.error('Store初期化エラー:', error);
             this.state.isLoading = false;
             this.notify();
+        }
+    }
+
+    async syncFromCloud() {
+        if (!this.state.user) return;
+        try {
+            this.setState({ isLoading: true });
+            await db.syncTransactionsFromCloud();
+            await this.loadTransactions();
+            this.setState({ isLoading: false });
+        } catch (error) {
+            console.error('Cloud Sync failed:', error);
+            this.setState({ isLoading: false });
         }
     }
 
@@ -84,11 +108,23 @@ class Store {
         this.setState({ isLoading: false });
     }
 
+    // 年度を変更する
+    async setYear(year) {
+        this.setState({ currentYear: year, isLoading: true });
+        await this.loadTransactions();
+        this.setState({ isLoading: false });
+    }
+
     // 現在の月の取引を読み込む
     async loadTransactions() {
         const yearMonth = `${this.state.currentYear}-${String(this.state.currentMonth).padStart(2, '0')}`;
         const txs = await db.getTransactionsByMonth(yearMonth);
         this.state.transactions = txs;
+    }
+
+    // 指定した年のすべての取引を読み込む
+    async loadYearTransactions(year) {
+        return await db.getTransactionsByYear(year || this.state.currentYear);
     }
 
     // 取引を追加する

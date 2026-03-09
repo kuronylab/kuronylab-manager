@@ -1,15 +1,17 @@
 import { store } from '../store.js';
+import { signOut } from '../utils/supabase.js';
 
 export function renderSidebar() {
-    const container = document.createElement('div');
-    container.className = 'sidebar-container';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.height = '100%';
+  const container = document.createElement('div');
+  container.className = 'sidebar-container';
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.height = '100%';
 
-    const currentYear = store.state.currentYear || new Date().getFullYear();
+  const currentYear = store.state.currentYear || new Date().getFullYear();
+  const user = store.state.user;
 
-    container.innerHTML = `
+  container.innerHTML = `
     <div class="sidebar-logo">
       <div class="sidebar-logo-icon">K</div>
       <div class="sidebar-logo-text">
@@ -61,6 +63,14 @@ export function renderSidebar() {
           <div class="sidebar-link-icon">📄</div>
           <span>確定申告サマリー</span>
         </a>
+        <a href="#inventory" class="sidebar-link">
+          <div class="sidebar-link-icon">🗃️</div>
+          <span>棚卸資産（在庫なし可）</span>
+        </a>
+        <a href="#depreciation" class="sidebar-link">
+          <div class="sidebar-link-icon">🖩</div>
+          <span>減価償却</span>
+        </a>
       </div>
 
       <div class="sidebar-section">
@@ -77,19 +87,60 @@ export function renderSidebar() {
     </nav>
     
     <div class="sidebar-footer">
+      ${user ? `
+        <div class="sidebar-user-info">
+          <div class="user-email text-xs text-muted truncate">${user.email}</div>
+          <button class="btn btn-ghost btn-xs btn-logout" style="width: 100%; margin-top: 5px;">ログアウト</button>
+        </div>
+      ` : ''}
       <div class="sidebar-year-badge">
         📅 ${currentYear}年度
       </div>
     </div>
   `;
 
-    // イベントリスナーやStore購読の設定
-    store.subscribe((state) => {
-        const yearBadge = container.querySelector('.sidebar-year-badge');
-        if (yearBadge) {
-            yearBadge.innerHTML = `📅 ${state.currentYear}年度`;
-        }
+  // イベントリスナー
+  const logoutBtn = container.querySelector('.btn-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut();
+        window.location.hash = '#auth';
+      } catch (err) {
+        console.error('Logout failed:', err);
+      }
     });
+  }
 
-    return container;
+  // Store購読の設定
+  store.subscribe((state) => {
+    // ユーザー情報の更新
+    const footer = container.querySelector('.sidebar-footer');
+    if (footer) {
+      const user = state.user;
+      const currentYear = state.currentYear;
+
+      footer.innerHTML = `
+        ${user ? `
+          <div class="sidebar-user-info">
+            <div class="user-email text-xs text-muted truncate">${user.email}</div>
+            <button class="btn btn-ghost btn-xs btn-logout" style="width: 100%; margin-top: 5px;">ログアウト</button>
+          </div>
+        ` : ''}
+        <div class="sidebar-year-badge">
+          📅 ${currentYear}年度
+        </div>
+      `;
+
+      const newLogoutBtn = footer.querySelector('.btn-logout');
+      if (newLogoutBtn) {
+        newLogoutBtn.addEventListener('click', async () => {
+          await signOut();
+          window.location.hash = '#auth';
+        });
+      }
+    }
+  });
+
+  return container;
 }

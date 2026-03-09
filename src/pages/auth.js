@@ -86,7 +86,7 @@ export function onAuthMount() {
             if (mode === 'login') {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
-                showToast('ログインしました', 'success');
+                // showToastは main.js の onAuthStateChange で一元管理するため削除
             } else {
                 const { error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;

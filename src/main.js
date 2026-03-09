@@ -38,8 +38,19 @@ async function bootstrap() {
     store.setState({ user: session?.user || null });
 
     // 認証状態の変化を監視
-    supabase.auth.onAuthStateChange((_event, session) => {
-        store.setState({ user: session?.user || null });
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        const previousUser = store.state.user;
+        const newUser = session?.user || null;
+
+        store.setState({ user: newUser });
+
+        if (event === 'SIGNED_IN' && !previousUser) {
+            const { showToast } = await import('./components/toast.js');
+            showToast('ログインしました', 'success');
+            // ログイン時に同期を実行
+            await store.syncFromCloud();
+        }
+
         if (!session) {
             window.location.hash = '#auth';
         }

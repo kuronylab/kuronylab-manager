@@ -403,6 +403,7 @@ class Database {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        // 1. クラウドからデータを取得
         const { data: cloudTxs, error } = await supabase
             .from('transactions')
             .select('*')
@@ -424,8 +425,8 @@ class Database {
                 creditAccount: ctx.credit_account,
                 amount: ctx.amount,
                 description: ctx.description,
-                partner: ctx.partner,
-                tags: ctx.tags,
+                partner: ctx.partner || '',
+                tags: ctx.tags || '',
                 usageType: ctx.usage_type,
                 businessUseRatio: ctx.business_use_ratio,
                 apportionmentMethod: ctx.apportionment_method,
@@ -440,10 +441,22 @@ class Database {
             store.put(localData);
         }
 
-        return new Promise((resolve, reject) => {
+        await new Promise((resolve, reject) => {
             transaction.oncomplete = () => resolve();
             transaction.onerror = (e) => reject(e);
         });
+
+        // 2. 逆に、ローカルにしかないデータをクラウドに送る（PCデータの同期用）
+        const allLocalTxs = await this.getAllTransactions();
+        const cloudIds = new Set(cloudTxs.map(tx => tx.id));
+        const localOnlyTxs = allLocalTxs.filter(tx => !cloudIds.has(tx.id));
+
+        if (localOnlyTxs.length > 0) {
+            console.log(`Syncing ${localOnlyTxs.length} local-only transactions to cloud...`);
+            for (const tx of localOnlyTxs) {
+                await this.syncTransactionToCloud(tx, user.id);
+            }
+        }
     }
 
     async getTransactionsByMonth(yearMonth) {

@@ -16,7 +16,7 @@ export function renderAuth() {
                 <p class="text-muted text-sm" id="auth-subtitle">KURONYLAB 帳簿へようこそ</p>
             </div>
             
-            <form id="auth-form" class="mt-lg">
+            <form id="auth-form" name="login" class="mt-lg">
                 <div class="form-group">
                     <label class="form-label">メールアドレス</label>
                     <input type="email" id="auth-email" name="email" autocomplete="username" class="form-input" required placeholder="example@mail.com">

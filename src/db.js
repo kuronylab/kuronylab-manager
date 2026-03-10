@@ -1,7 +1,7 @@
 import { DEFAULT_ACCOUNTS } from './utils/accounts-master.js';
 import { supabase } from './utils/supabase.js';
 
-const DB_NAME = 'kuronylab_db';
+const DB_NAME = 'kuronylab_manager_db';
 const DB_VERSION = 5;
 
 class Database {

@@ -26,20 +26,16 @@ import { renderAuth, onAuthMount } from './pages/auth.js';
 
 async function bootstrap() {
     try {
-        console.log('KURONYLAB Manager - Initializing bootstrap...');
+        
         const initTimer = setTimeout(() => {
             console.warn('Initialization is taking longer than expected. Check Supabase or IndexedDB connectivity.');
         }, 5000);
 
         // 1. データベースの初期化待機
-        console.time('DB Ready');
         await db.ready.catch(err => console.error('Database failed to initialize:', err));
-        console.timeEnd('DB Ready');
 
         // 2. グローバルStoreの初期化 (DBからデータ読み込み)
-        console.time('Store Init');
         await store.init().catch(err => console.error('Store failed to initialize:', err));
-        console.timeEnd('Store Init');
         clearTimeout(initTimer);
 
         // 2.5 認証セッションの確認
@@ -121,7 +117,7 @@ async function bootstrap() {
         router.init();
 
         // 画面ローディングを完了
-        console.log('App initialized fully.');
+        
     } catch (error) {
         console.error('CRITICAL BOOTSTRAP ERROR:', error);
         document.body.innerHTML = `<div style="padding: 2rem; color: #f43f5e; font-family: sans-serif;">

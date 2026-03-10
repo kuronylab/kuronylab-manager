@@ -99,7 +99,7 @@ class Database {
     }
 
     migrateDataV4(db) {
-        console.log('Migrating data to V4 (Apportionment Initialization)...');
+        
         // We open a new transaction for the migration
         const transaction = db.transaction(['transactions'], 'readwrite');
         const store = transaction.objectStore('transactions');
@@ -115,7 +115,7 @@ class Database {
                     store.put(tx);
                 }
             });
-            console.log('V4 Migration complete.');
+            
         };
         request.onerror = (e) => {
             console.error('V4 Migration failed:', e);
@@ -459,7 +459,7 @@ class Database {
         const localOnlyTxs = allLocalTxs.filter(tx => !cloudIds.has(tx.id));
 
         if (localOnlyTxs.length > 0) {
-            console.log(`Syncing ${localOnlyTxs.length} local-only transactions to cloud...`);
+            
             for (const tx of localOnlyTxs) {
                 await this.syncTransactionToCloud(tx, user.id);
             }

@@ -45,7 +45,7 @@ export async function extractTextFromImage(imageFile) {
             blob,
             'jpn', // 日本語モデルを指定
             {
-                logger: m => console.log(m) // 進行状況のロギング
+                logger: m => 
             }
         );
         return result.data.text;
@@ -97,7 +97,7 @@ export async function extractTextFromPDF(pdfFile) {
 
         // --- フォールバック: テキストがほとんど取れない場合 (スキャンされたPDF) ---
         if (fullText.trim().length < 20) {
-            console.log("PDF contains very little text. Falling back to OCR (Canvas Rendering)...");
+            
             const firstPage = await pdfDocument.getPage(1);
             const viewport = firstPage.getViewport({ scale: 2.0 }); // 精度を上げるため 2倍でレンダリング
             const canvas = document.createElement('canvas');

@@ -292,6 +292,7 @@ class Database {
             is_apportionment_adjustment: tx.isApportionmentAdjustment || false,
             parent_tx_id: tx.parentTxId,
             linked_adjustment_entry_id: tx.linkedAdjustmentEntryId,
+            app_type: 'manager',
             updated_at: tx.updatedAt
         };
         await supabase.from('transactions').upsert(cloudData);
@@ -412,7 +413,8 @@ class Database {
         const { data: cloudTxs, error } = await supabase
             .from('transactions')
             .select('*')
-            .eq('user_id', user.id);
+            .eq('user_id', user.id)
+            .eq('app_type', 'manager');
 
         if (error) throw error;
         if (!cloudTxs) return;
@@ -631,6 +633,8 @@ class Database {
 
     async clearAllData() {
         await this.ready;
+        // ログアウトしてクラウド同期を止める
+        await supabase.auth.signOut();
         return new Promise((resolve, reject) => {
             const stores = ['transactions', 'accounts', 'settings', 'subscriptions', 'sync_logs'];
             const transaction = this.db.transaction(stores, 'readwrite');

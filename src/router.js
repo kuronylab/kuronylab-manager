@@ -31,6 +31,13 @@ class Router {
         const pathParts = path.split('?');
         const routePath = pathParts[0];
 
+        // 認証ガード: ログインしていない場合は強制的にauthへ
+        const isAuthPage = routePath.includes('auth');
+        if (!store.state.user && !isAuthPage) {
+            window.location.hash = '#auth';
+            return;
+        }
+
         const route = this.routes[routePath] || this.routes['dashboard'];
 
         // アクティブなルートをStoreに保存

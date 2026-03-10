@@ -635,21 +635,25 @@ class Database {
         await this.ready;
         // ログアウトしてクラウド同期を止める
         await supabase.auth.signOut();
+
         return new Promise((resolve, reject) => {
-            const stores = ['transactions', 'accounts', 'settings', 'subscriptions', 'sync_logs'];
-            const transaction = this.db.transaction(stores, 'readwrite');
+            if (this.db) {
+                this.db.close();
+                this.db = null;
+            }
 
-            stores.forEach(s => {
-                if (this.db.objectStoreNames.contains(s)) {
-                    transaction.objectStore(s).clear();
-                }
-            });
+            const request = indexedDB.deleteDatabase(DB_NAME);
 
-            transaction.oncomplete = () => {
+            request.onsuccess = () => {
                 localStorage.clear();
-                this.seedInitialData(this.db).then(resolve).catch(reject);
+                resolve();
             };
-            transaction.onerror = (e) => reject(e);
+            request.onerror = (e) => reject(e);
+            request.onblocked = () => {
+                console.warn('Delete blocked, please close other tabs');
+                localStorage.clear();
+                resolve(); // 強行
+            };
         });
     }
 

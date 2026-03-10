@@ -633,7 +633,17 @@ class Database {
 
     async clearAllData() {
         await this.ready;
-        // ログアウトしてクラウド同期を止める
+
+        // 1. クラウド（Supabase）のデータを削除 (自分のアプリ分のみ)
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            await supabase.from('transactions')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('app_type', 'manager');
+        }
+
+        // 2. ログアウトしてクラウド同期を完全に止める
         await supabase.auth.signOut();
 
         return new Promise((resolve, reject) => {

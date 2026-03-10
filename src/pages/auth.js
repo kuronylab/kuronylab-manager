@@ -19,11 +19,11 @@ export function renderAuth() {
             <form id="auth-form" class="mt-lg">
                 <div class="form-group">
                     <label class="form-label">メールアドレス</label>
-                    <input type="email" id="auth-email" class="form-input" required placeholder="example@mail.com">
+                    <input type="email" id="auth-email" name="email" autocomplete="username" class="form-input" required placeholder="example@mail.com">
                 </div>
                 <div class="form-group">
                     <label class="form-label">パスワード</label>
-                    <input type="password" id="auth-password" class="form-input" required placeholder="••••••••">
+                    <input type="password" id="auth-password" name="password" autocomplete="current-password" class="form-input" required placeholder="••••••••">
                 </div>
                 
                 <button type="submit" class="btn btn-primary w-full mt-md" id="btn-auth-submit">ログイン</button>

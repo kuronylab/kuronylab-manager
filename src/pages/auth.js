@@ -13,7 +13,7 @@ export function renderAuth() {
             </div>
             <div class="auth-header">
                 <h2 id="auth-title">ログイン</h2>
-                <p class="text-muted text-sm" id="auth-subtitle">KURONYLAB 収益管理システムへようこそ</p>
+                <p class="text-muted text-sm" id="auth-subtitle">KURONYLAB 帳簿へようこそ</p>
             </div>
             
             <form id="auth-form" class="mt-lg">

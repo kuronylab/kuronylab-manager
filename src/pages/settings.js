@@ -272,8 +272,8 @@ export function onSettingsMount() {
         industryType: document.getElementById('set-industry-type').value,
         taxReturnMethod: document.getElementById('set-tax-return').value,
         blueReturnDeduction: parseInt(document.getElementById('set-blue-deduction').value, 10),
-        otherAppUrl: document.getElementById('set-other-app-url').value,
-        fixedRatePerStore: parseInt(document.getElementById('set-fixed-rate').value, 10) || 10000
+        otherAppUrl: document.getElementById('set-other-app-url')?.value || '',
+        fixedRatePerStore: parseInt(document.getElementById('set-fixed-rate')?.value, 10) || 10000
       };
 
       try {
@@ -290,7 +290,8 @@ export function onSettingsMount() {
   const saveStoreSettingsBtn = document.getElementById('btn-save-store-settings');
   if (saveStoreSettingsBtn) {
     saveStoreSettingsBtn.addEventListener('click', async () => {
-      const fixedRate = parseInt(document.getElementById('set-fixed-rate').value, 10) || 10000;
+      const el = document.getElementById('set-fixed-rate');
+      const fixedRate = el ? parseInt(el.value, 10) : 10000;
       const newSettings = {
         ...store.state.settings,
         fixedRatePerStore: fixedRate

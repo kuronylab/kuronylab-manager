@@ -19,6 +19,11 @@ class Database {
                 reject(e);
             };
 
+            request.onblocked = () => {
+                alert('データベースの構成が他のタブによってブロックされています。開いている他のタブをすべて閉じて、再読み込みしてください。');
+                reject(new Error('IndexedDB blocked'));
+            };
+
             request.onsuccess = (e) => {
                 this.db = e.target.result;
                 resolve();

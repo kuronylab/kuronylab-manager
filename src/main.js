@@ -25,94 +25,111 @@ import { renderAuth, onAuthMount } from './pages/auth.js';
 
 
 async function bootstrap() {
-    console.log('KURONYLAB Manager - Initializing...');
+    try {
+        console.log('KURONYLAB Manager - Initializing bootstrap...');
+        const initTimer = setTimeout(() => {
+            console.warn('Initialization is taking longer than expected. Check Supabase or IndexedDB connectivity.');
+        }, 5000);
 
-    // 1. データベースの初期化待機
-    await db.ready;
+        // 1. データベースの初期化待機
+        console.time('DB Ready');
+        await db.ready.catch(err => console.error('Database failed to initialize:', err));
+        console.timeEnd('DB Ready');
 
-    // 2. グローバルStoreの初期化 (DBからデータ読み込み)
-    await store.init();
+        // 2. グローバルStoreの初期化 (DBからデータ読み込み)
+        console.time('Store Init');
+        await store.init().catch(err => console.error('Store failed to initialize:', err));
+        console.timeEnd('Store Init');
+        clearTimeout(initTimer);
 
-    // 2.5 認証セッションの確認
-    const { data: { session } } = await supabase.auth.getSession();
-    store.setState({ user: session?.user || null });
+        // 2.5 認証セッションの確認
+        const { data: { session } } = await supabase.auth.getSession();
+        store.setState({ user: session?.user || null });
 
-    // 認証状態の変化を監視
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        const previousUser = store.state.user;
-        const newUser = session?.user || null;
+        // 認証状態の変化を監視
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            const previousUser = store.state.user;
+            const newUser = session?.user || null;
 
-        store.setState({ user: newUser });
+            store.setState({ user: newUser });
 
-        if (event === 'SIGNED_IN' && !previousUser) {
-            const { showToast } = await import('./components/toast.js');
-            showToast('ログインしました', 'success');
-            // ログイン時に同期を実行
-            await store.syncFromCloud();
-        }
+            if (event === 'SIGNED_IN' && !previousUser) {
+                const { showToast } = await import('./components/toast.js');
+                showToast('ログインしました', 'success');
+                // ログイン時に同期を実行
+                await store.syncFromCloud();
+            }
 
-        if (!session) {
+            if (!session) {
+                window.location.hash = '#auth';
+            }
+        });
+
+        // ログインしていない場合は認証画面へ（ハッシュがない、または認証が必要なページの場合）
+        if (!session && !window.location.hash.includes('auth')) {
             window.location.hash = '#auth';
         }
-    });
 
-    // ログインしていない場合は認証画面へ（ハッシュがない、または認証が必要なページの場合）
-    if (!session && !window.location.hash.includes('auth')) {
-        window.location.hash = '#auth';
-    }
+        // 3. 基本レイアウト（サイドバー・ヘッダー）の描画
+        document.getElementById('sidebar').appendChild(renderSidebar());
+        document.getElementById('app-header').appendChild(renderHeader());
 
-    // 3. 基本レイアウト（サイドバー・ヘッダー）の描画
-    document.getElementById('sidebar').appendChild(renderSidebar());
-    document.getElementById('app-header').appendChild(renderHeader());
+        // 3.5 モバイル用サイドバーオーバーレイの追加
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.id = 'sidebar-overlay';
+        document.body.appendChild(overlay);
 
-    // 3.5 モバイル用サイドバーオーバーレイの追加
-    const overlay = document.createElement('div');
-    overlay.className = 'sidebar-overlay';
-    overlay.id = 'sidebar-overlay';
-    document.body.appendChild(overlay);
+        overlay.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('open');
+            overlay.classList.remove('open');
+        });
 
-    overlay.addEventListener('click', () => {
-        document.getElementById('sidebar').classList.remove('open');
-        overlay.classList.remove('open');
-    });
-
-    // サイドバー内のリンククリックでスマホの場合はサイドバーを閉じる
-    document.getElementById('sidebar').addEventListener('click', (e) => {
-        if (e.target.closest('.sidebar-link')) {
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.remove('open');
-                overlay.classList.remove('open');
+        // サイドバー内のリンククリックでスマホの場合はサイドバーを閉じる
+        document.getElementById('sidebar').addEventListener('click', (e) => {
+            if (e.target.closest('.sidebar-link')) {
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('open');
+                    overlay.classList.remove('open');
+                }
             }
+        });
+
+        // 4. ルーターの設定
+        router.addRoute('dashboard', renderDashboard, onDashboardMount);
+        router.addRoute('transactions', renderTransactions, onTransactionsMount);
+        router.addRoute('journal', renderJournal, onJournalMount);
+        router.addRoute('ledger', renderLedger, onLedgerMount);
+        router.addRoute('trial-balance', renderTrialBalance, onTrialBalanceMount);
+        router.addRoute('pl', renderPL, onPLMount);
+        router.addRoute('bs', renderBS, onBSMount);
+        router.addRoute('tax-summary', renderTaxSummary, onTaxSummaryMount);
+        router.addRoute('accounts', renderAccounts, onAccountsMount);
+        router.addRoute('inventory', renderInventory, onInventoryMount);
+        router.addRoute('depreciation', renderDepreciation, onDepreciationMount);
+        router.addRoute('settings', renderSettings, onSettingsMount);
+        router.addRoute('auth', renderAuth, onAuthMount);
+
+        // 4.5 自動記帳（サブスクリプション）の実行
+        const syncedCount = await db.processAutoSubscriptions();
+        if (syncedCount > 0) {
+            const { showToast } = await import('./components/toast.js');
+            showToast(`${syncedCount}件のサブスクリプションを自動記帳しました`, 'info');
         }
-    });
 
-    // 4. ルーターの設定
-    router.addRoute('dashboard', renderDashboard, onDashboardMount);
-    router.addRoute('transactions', renderTransactions, onTransactionsMount);
-    router.addRoute('journal', renderJournal, onJournalMount);
-    router.addRoute('ledger', renderLedger, onLedgerMount);
-    router.addRoute('trial-balance', renderTrialBalance, onTrialBalanceMount);
-    router.addRoute('pl', renderPL, onPLMount);
-    router.addRoute('bs', renderBS, onBSMount);
-    router.addRoute('tax-summary', renderTaxSummary, onTaxSummaryMount);
-    router.addRoute('accounts', renderAccounts, onAccountsMount);
-    router.addRoute('inventory', renderInventory, onInventoryMount);
-    router.addRoute('depreciation', renderDepreciation, onDepreciationMount);
-    router.addRoute('settings', renderSettings, onSettingsMount);
-    router.addRoute('auth', renderAuth, onAuthMount);
+        // 5. ルーター起動 (現在のURLから最初のページを描画)
+        router.init();
 
-    // 4.5 自動記帳（サブスクリプション）の実行
-    const syncedCount = await db.processAutoSubscriptions();
-    if (syncedCount > 0) {
-        const { showToast } = await import('./components/toast.js');
-        showToast(`${syncedCount}件のサブスクリプションを自動記帳しました`, 'info');
+        // 画面ローディングを完了
+        console.log('App initialized fully.');
+    } catch (error) {
+        console.error('CRITICAL BOOTSTRAP ERROR:', error);
+        document.body.innerHTML = `<div style="padding: 2rem; color: #f43f5e; font-family: sans-serif;">
+            <h2>アプリの起動に失敗しました</h2>
+            <p>ブラウザのコンソールで詳細を確認するか、ページを再読み込みしてください。</p>
+            <pre style="background: #1e293b; color: white; padding: 1rem; border-radius: 8px;">${error.message}</pre>
+        </div>`;
     }
-
-    // 5. ルーター起動 (現在のURLから最初のページを描画)
-    router.init();
-
-    // 画面ローディングを完了
-    console.log('App initialized fully.');
 }
 
 // アプリの起動

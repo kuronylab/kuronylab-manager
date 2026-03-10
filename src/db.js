@@ -632,12 +632,17 @@ class Database {
     async clearAllData() {
         await this.ready;
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['transactions', 'accounts', 'settings'], 'readwrite');
-            transaction.objectStore('transactions').clear();
-            transaction.objectStore('accounts').clear();
-            transaction.objectStore('settings').clear();
+            const stores = ['transactions', 'accounts', 'settings', 'subscriptions', 'sync_logs'];
+            const transaction = this.db.transaction(stores, 'readwrite');
+
+            stores.forEach(s => {
+                if (this.db.objectStoreNames.contains(s)) {
+                    transaction.objectStore(s).clear();
+                }
+            });
 
             transaction.oncomplete = () => {
+                localStorage.clear();
                 this.seedInitialData(this.db).then(resolve).catch(reject);
             };
             transaction.onerror = (e) => reject(e);

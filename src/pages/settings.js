@@ -372,8 +372,10 @@ export function onSettingsMount() {
         async () => {
           try {
             await db.clearAllData();
-            await store.init();
-            showToast('すべてのデータを初期化しました', 'success');
+            showToast('すべてのデータを初期化しました。再起動します...', 'success');
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
           } catch (e) {
             showToast('データ初期化に失敗しました', 'error');
           }

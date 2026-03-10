@@ -75,6 +75,12 @@ export function renderSettings() {
             </div>
           </div>
           
+          <div class="form-group">
+            <label class="form-label">他アプリのURL (家計簿など)</label>
+            <input type="url" id="set-other-app-url" class="form-input" placeholder="https://example-kakeibo.vercel.app">
+            <small class="text-xs text-muted">アプリ切り替えボタンの遷移先URLを入力します</small>
+          </div>
+          
           <button type="button" class="btn btn-primary mt-md" id="btn-save-settings">設定を保存する</button>
         </form>
       <!-- 自動記帳（サブスクリプション）設定 -->
@@ -241,6 +247,7 @@ export function onSettingsMount() {
     setVal('set-industry-type', settings.industryType || '');
     setVal('set-tax-return', settings.taxReturnMethod || 'blue');
     setVal('set-blue-deduction', settings.blueReturnDeduction || '650000');
+    setVal('set-other-app-url', settings.otherAppUrl || '');
     setVal('set-fixed-rate', settings.fixedRatePerStore || 10000);
   };
 
@@ -263,6 +270,7 @@ export function onSettingsMount() {
         industryType: document.getElementById('set-industry-type').value,
         taxReturnMethod: document.getElementById('set-tax-return').value,
         blueReturnDeduction: parseInt(document.getElementById('set-blue-deduction').value, 10),
+        otherAppUrl: document.getElementById('set-other-app-url').value,
         fixedRatePerStore: parseInt(document.getElementById('set-fixed-rate').value, 10) || 10000
       };
 

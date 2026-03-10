@@ -18,7 +18,7 @@ export function renderSidebar() {
       </div>
       <div class="sidebar-logo-text">
         <span class="sidebar-logo-name">KURONYLAB</span>
-        <span class="sidebar-logo-label">Manager</span>
+        <span class="sidebar-logo-label">帳簿</span>
       </div>
     </a>
     
@@ -86,6 +86,16 @@ export function renderSidebar() {
           <span>事業者設定</span>
         </a>
       </div>
+
+      ${store.state.settings.otherAppUrl ? `
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">アプリ切り替え</div>
+        <a href="${store.state.settings.otherAppUrl}" class="sidebar-link" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+          <div class="sidebar-link-icon">🔄</div>
+          <span class="font-bold text-primary">家計簿へ切り替え</span>
+        </a>
+      </div>
+      ` : ''}
     </nav>
     
     <div class="sidebar-footer">

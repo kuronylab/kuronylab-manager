@@ -89,15 +89,13 @@ export function renderSidebar() {
           </a>
         </div>
 
-        ${settings.otherAppUrl ? `
         <div class="sidebar-section">
           <div class="sidebar-section-title">アプリ切り替え</div>
-          <a href="${settings.otherAppUrl}" class="sidebar-link" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+          <a href="https://kuronylab-kakeibo.vercel.app/" class="sidebar-link" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
             <div class="sidebar-link-icon">🔄</div>
             <span class="font-bold text-primary">家計簿へ切り替え</span>
           </a>
         </div>
-        ` : ''}
       </nav>
       
       <div class="sidebar-footer">

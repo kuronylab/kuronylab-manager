@@ -10,6 +10,7 @@ export function renderSidebar() {
 
   const currentYear = store.state.currentYear || new Date().getFullYear();
   const user = store.state.user;
+  const settings = store.state.settings || {};
 
   container.innerHTML = `
     <a href="#dashboard" class="sidebar-logo" style="text-decoration: none; display: flex; align-items: center; gap: var(--spacing-md); cursor: pointer;">
@@ -87,7 +88,7 @@ export function renderSidebar() {
         </a>
       </div>
 
-      ${store.state.settings.otherAppUrl ? `
+      ${settings.otherAppUrl ? `
       <div class="sidebar-section">
         <div class="sidebar-section-title">アプリ切り替え</div>
         <a href="${store.state.settings.otherAppUrl}" class="sidebar-link" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">

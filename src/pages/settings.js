@@ -83,8 +83,10 @@ export function renderSettings() {
           
           <button type="button" class="btn btn-primary mt-md" id="btn-save-settings">設定を保存する</button>
         </form>
+      </div>
+
       <!-- 自動記帳（サブスクリプション）設定 -->
-      <div class="card settings-card" style="margin-top: var(--spacing-lg);">
+      <div class="card settings-card">
         <h3 class="settings-section-title">毎月の自動記帳・サブスクリプション</h3>
         <p class="text-sm text-muted mb-md">毎月決まった日に発生する固定費（ChatGPT代、家賃、サーバー代など）を登録しておくと、該当月にアプリを開いたタイミングで自動的に記帳されます。</p>
         
@@ -236,7 +238,7 @@ export function onSettingsMount() {
 
   // 初期値のセット
   const setFormValues = () => {
-    const { settings } = store.state;
+    const settings = store.state.settings || {};
     const setVal = (id, val) => {
       const el = document.getElementById(id);
       if (el && val !== undefined) el.value = val;
